@@ -8,16 +8,19 @@ Created by Dave Williams on 2014-06-23
 
 import img
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-## Simulation parameters, a temporary storage location
+# Simulation parameters, a temporary storage location
 SIDLE_STOP = 0.2  # 20% chance of stopping sidling
+SIDLE_BY = 1.0    # distance to sidle when sidling
 HEAD_NOISE = 10   # standard deviation (in deg) of heading noise
+WALK_MEAN = 2     # the mean distance to walk each turn
+WALK_NOISE = 0.2  # the noise in the walking distance
+
 
 class Bee(object):
-    def __init__(self, porch, location, stationary = True):
-        """Create a bee, just like that. 
+    def __init__(self, porch, location, stationary=True):
+        """Create a bee, just like that.
 
         Takes:
             porch - the porch the bee is located on
@@ -33,15 +36,25 @@ class Bee(object):
         self.loc = location
         self.get_goal()  # set self.head
 
+    def show_bee(self):
+        """Give a matrix of the bee's image on the current heading."""
+        dx, dy = np.subtract(head, loc)
+        angle = np.arctan2(dy, dx) - np.pi/2
+        self.img.rotate(np.degrees(angle))
+        return self.img.array()
+
     def get_goal(self):
         """For now, just head to the entrance.
-        
+
         Takes: 
             None
         Gives:
-            goal: the (x,y) coordinates the bee is heading towards
+            head: the (x,y) coordinates the bee is heading towards
         """
-        self.head = porch.get_entrance()
+        if self.stationary:
+            self.head = (self.loc[0], self.porch.get_entrance()[1])
+        else:
+            self.head = self.porch.get_entrance()
         return self.head
 
     def update_location(self):
@@ -53,19 +66,34 @@ class Bee(object):
             new_loc: the bee's updated (x,y) location
         """
         if self.stationary:
+            # Stand still or sidle to the side
             if self.sidling is False:
-                return self.loc # stationary bee sits still for now
+                return self.loc  # stationary bee sits still for now
             elif self.sidling == 'Left':
-                self.loc = (self.loc[0] - 1, self.loc[1])
-                if SIDLE_STOP > np.random.rand():
+                self.loc = (self.loc[0] - SIDLE_BY, self.loc[1])
+                if SIDLE_STOP > np.random.rand():  # chance to stop
                     self.sidling = False
             elif self.sidling == 'Right':
-                self.loc = (self.loc[0] + 1, self.loc[1])
+                self.loc = (self.loc[0] + SIDLE_BY, self.loc[1])
                 if SIDLE_STOP > np.random.rand():
                     self.sidling = False
         else:
-            #Head towards the light^h^h^h^h^h heading, little bee
-            # TODO: Continue from here
+            # Head towards the light^h^h^h^h^h heading, little bee
+            dx, dy = np.subtract(head, loc)
+            dist_to_goal = np.hypot(dx, dy)
+            walk_this_much = np.random.normal(WALK_MEAN, WALK_NOISE)
+            scale = walk_this_much/dist_to_goal
+            self.loc = np.add(self.loc, (dx*scale, dy*scale))
+        return self.loc
 
-
+        def collide(self, side):
+            """Bump a bee, from the Left or the Right.
+            
+            Takes:
+                side: 'Left' or 'Right', the side the bee got bumped towards
+            Gives:
+                None
+            """
+            if self.stationary:
+                self.sidling = side
 
