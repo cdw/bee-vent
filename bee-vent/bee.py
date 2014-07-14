@@ -32,7 +32,7 @@ class Bee(object):
         self.porch = porch
         self.stationary = stationary
         self.sidling = False  # something only stationary bees do
-        self.img = img.bew_bee_img()
+        self.img = img.new_bee_img()
         self.loc = location
         self.get_goal()  # set self.head
 
@@ -52,7 +52,7 @@ class Bee(object):
             head: the (x,y) coordinates the bee is heading towards
         """
         if self.stationary:
-            self.head = (self.loc[0], self.porch.get_entrance()[1])
+            self.head = (self.loc[0], self.porch.get_edges()[1])
         else:
             self.head = self.porch.get_entrance()
         return self.head
@@ -84,6 +84,8 @@ class Bee(object):
             walk_this_much = np.random.normal(WALK_MEAN, WALK_NOISE)
             scale = walk_this_much/dist_to_goal
             self.loc = np.add(self.loc, (dx*scale, dy*scale))
+        #TODO: check edges, coerce back to on porch if passed or wrap if
+        # entrance is hit
         return self.loc
 
         def collide(self, side):
