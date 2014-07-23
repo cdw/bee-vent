@@ -40,7 +40,7 @@ class Bee(object):
     def show_bee(self):
         """Give a matrix of the bee's image on the current heading."""
         dx, dy = np.subtract(self.head, self.loc)
-        angle = np.arctan2(dy, dx) - np.pi/2
+        angle = 3*np.pi/2 - np.arctan2(dy, dx)
         self.img.rotate(np.degrees(angle))
         return self.img.array()
 
@@ -53,7 +53,7 @@ class Bee(object):
             head: the (x,y) coordinates the bee is heading towards
         """
         if self.stationary:
-            self.head = (self.loc[0], self.porch.get_edges()[1])
+            self.head = (self.loc[0], 0)
         else:
             self.head = self.porch.get_entrance()
         return self.head
