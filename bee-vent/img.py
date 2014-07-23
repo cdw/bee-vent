@@ -39,7 +39,7 @@ class BeeImg(object):
 
     def array(self):
         """Return the image as a numpy array."""
-        return np.array(self._img.rotation(self._rotation))
+        return np.array(self._img.rotate(self._rotation))
 
 def new_bee_img():
     return BeeImg()

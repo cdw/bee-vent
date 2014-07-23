@@ -11,11 +11,12 @@ import numpy as np
 
 
 # Simulation parameters, a temporary storage location
-SIDLE_STOP = 0.2  # 20% chance of stopping sidling
-SIDLE_BY = 1.0    # distance to sidle when sidling
-HEAD_NOISE = 10   # standard deviation (in deg) of heading noise
-WALK_MEAN = 2     # the mean distance to walk each turn
-WALK_NOISE = 0.2  # the noise in the walking distance
+SIDLE_STOP = 0.2     # 20% chance of stopping sidling
+SIDLE_BY = 1.0       # distance to sidle when sidling
+HEAD_NOISE = 10      # standard deviation (in deg) of heading noise
+WALK_MEAN = 2        # the mean distance to walk each turn
+WALK_NOISE = 0.2     # the noise in the walking distance
+BEE_SIZE = (16, 16)  # size of the bee image, once loaded
 
 
 class Bee(object):
@@ -38,7 +39,7 @@ class Bee(object):
 
     def show_bee(self):
         """Give a matrix of the bee's image on the current heading."""
-        dx, dy = np.subtract(head, loc)
+        dx, dy = np.subtract(self.head, self.loc)
         angle = np.arctan2(dy, dx) - np.pi/2
         self.img.rotate(np.degrees(angle))
         return self.img.array()
@@ -79,7 +80,7 @@ class Bee(object):
                     self.sidling = False
         else:
             # Head towards the light^h^h^h^h^h heading, little bee
-            dx, dy = np.subtract(head, loc)
+            dx, dy = np.subtract(self.head, self.loc)
             dist_to_goal = np.hypot(dx, dy)
             walk_this_much = np.random.normal(WALK_MEAN, WALK_NOISE)
             scale = walk_this_much/dist_to_goal
